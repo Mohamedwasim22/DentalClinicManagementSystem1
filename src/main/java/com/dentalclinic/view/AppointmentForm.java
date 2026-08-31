@@ -14,6 +14,10 @@ import com.dentalclinic.util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import com.dentalclinic.model.Doctor;
+import com.dentalclinic.model.Patient;
+import com.dentalclinic.service.DoctorService;
+import com.dentalclinic.service.PatientService;
 
 import com.dentalclinic.model.Patient;
 
@@ -32,7 +36,7 @@ public class AppointmentForm extends javax.swing.JFrame {
      */
    public AppointmentForm() {
     initComponents();
-    dateChooser.setDate(new java.util.Date());
+    jDateChooser1.setDate(new java.util.Date());
 
     loadAppointments();
     loadPatients();
@@ -70,7 +74,7 @@ public class AppointmentForm extends javax.swing.JFrame {
         jComboBox3 = new javax.swing.JComboBox<>();
         jLabel11 = new javax.swing.JLabel();
         jComboBox4 = new javax.swing.JComboBox<>();
-        dateChooser = new com.toedter.calendar.JDateChooser();
+        jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -165,7 +169,7 @@ public class AppointmentForm extends javax.swing.JFrame {
         lblAppointmentDate.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         lblAppointmentDate.setText("Appointment Date :");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select Time", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Time", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM" }));
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox1ActionPerformed(evt);
@@ -184,9 +188,14 @@ public class AppointmentForm extends javax.swing.JFrame {
         jLabel9.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel9.setText("Appointment Time:");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Patient" }));
+        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox2ActionPerformed(evt);
+            }
+        });
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Doctor" }));
         jComboBox3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox3ActionPerformed(evt);
@@ -226,7 +235,7 @@ public class AppointmentForm extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(lblAppointmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(dateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jDateChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(113, 113, 113)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -263,7 +272,7 @@ public class AppointmentForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(lblAppointmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(dateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)))
+                            .addComponent(jDateChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -509,59 +518,151 @@ if (!found) {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
-
-    java.util.Date selectedDate = dateChooser.getDate();
-
-    if (selectedDate == null) {
-        JOptionPane.showMessageDialog(
-                this,
-                "Please select appointment date"
-        );
-        return;
-    }
-
-    java.sql.Date appointmentDate =
-            new java.sql.Date(selectedDate.getTime());
-
     try {
+
+        // =========================
+        // PATIENT
+        // =========================
+
+        if (jComboBox2.getSelectedIndex() == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a patient!"
+            );
+            return;
+        }
+
+        // =========================
+        // DOCTOR
+        // =========================
+
+        if (jComboBox3.getSelectedIndex() == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a doctor!"
+            );
+            return;
+        }
+
+        // =========================
+        // DATE
+        // =========================
+
+        if (jDateChooser1.getDate() == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select appointment date!"
+            );
+            return;
+        }
+
+        // =========================
+        // TIME
+        // =========================
+
+        if (jComboBox1.getSelectedIndex() == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select appointment time!"
+            );
+            return;
+        }
+
+        // =========================
+        // STATUS
+        // =========================
+
+        if (jComboBox4.getSelectedIndex() == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select status!"
+            );
+            return;
+        }
+
+        // =========================
+        // GET PATIENT ID
+        // =========================
 
         String patientValue =
                 jComboBox2.getSelectedItem().toString();
 
         int patientId = Integer.parseInt(
-                patientValue.split(" - ")[0].trim()
+                patientValue.split(" - ")[0]
         );
+
+        // =========================
+        // GET DOCTOR ID
+        // =========================
 
         String doctorValue =
                 jComboBox3.getSelectedItem().toString();
 
         int doctorId = Integer.parseInt(
-                doctorValue.split(" - ")[0].trim()
+                doctorValue.split(" - ")[0]
         );
+
+        // =========================
+        // DATE
+        // =========================
+
+        java.util.Date selectedDate =
+                jDateChooser1.getDate();
+
+        java.text.SimpleDateFormat dateFormat =
+                new java.text.SimpleDateFormat(
+                        "yyyy-MM-dd"
+                );
+
+        String appointmentDate =
+                dateFormat.format(selectedDate);
+
+        // =========================
+        // TIME
+        // =========================
 
         String appointmentTime =
                 jComboBox1.getSelectedItem().toString();
 
+        // =========================
+        // STATUS
+        // =========================
+
         String status =
                 jComboBox4.getSelectedItem().toString();
 
-        String reason =
+        // =========================
+        // REASON / NOTES
+        // =========================
+
+        String notes =
                 jTextField4.getText().trim();
 
-        Appointment appointment = new Appointment(
-                patientId,
-                doctorId,
-                appointmentDate.toString(),
-                appointmentTime,
-                status,
-                reason
-        );
+        // =========================
+        // CREATE APPOINTMENT
+        // =========================
+
+        Appointment appointment =
+                new Appointment();
+
+        appointment.setPatientId(patientId);
+        appointment.setDoctorId(doctorId);
+        appointment.setAppointmentDate(appointmentDate);
+        appointment.setAppointmentTime(appointmentTime);
+        appointment.setStatus(status);
+        appointment.setNotes(notes);
+
+        // =========================
+        // SAVE
+        // =========================
 
         AppointmentService appointmentService =
                 new AppointmentService();
 
         boolean saved =
-                appointmentService.saveAppointment(appointment);
+                appointmentService.saveAppointment(
+                        appointment
+                );
 
         if (saved) {
 
@@ -571,8 +672,6 @@ if (!found) {
             );
 
             loadAppointments();
-            loadNextAppointmentId();
-            clearAppointmentFields();
 
         } else {
 
@@ -582,6 +681,13 @@ if (!found) {
             );
         }
 
+    } catch (NumberFormatException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Patient/Doctor ID format is invalid!"
+        );
+
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
@@ -589,7 +695,6 @@ if (!found) {
                 "Error: " + e.getMessage()
         );
     }
-
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -663,7 +768,7 @@ jComboBox2.requestFocus();
         );
 
         // Appointment Date
-        java.util.Date selectedDate = dateChooser.getDate();
+        java.util.Date selectedDate = jDateChooser1.getDate();
 
         if (selectedDate == null) {
             JOptionPane.showMessageDialog(
@@ -856,68 +961,85 @@ if (selectedRow >= 0) {
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
+
+    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox2ActionPerformed
     private void loadAppointments() {
+
+    AppointmentService appointmentService =
+            new AppointmentService();
+
+    List<Appointment> appointments =
+            appointmentService.getAllAppointments();
+
+    DefaultTableModel model =
+            (DefaultTableModel) tblPatients.getModel();
+
+    model.setRowCount(0);
+
+    for (Appointment appointment : appointments) {
+
+        model.addRow(new Object[]{
+            appointment.getId(),
+            appointment.getPatientId(),
+            appointment.getDoctorId(),
+            appointment.getAppointmentDate(),
+            appointment.getAppointmentTime(),
+            appointment.getStatus(),
+            appointment.getNotes()
+        });
+    }
+
+    // Refresh table
+    model.fireTableDataChanged();
+
 }
-    private void loadPatients() {
-         try {
+private void loadPatients() {
 
-        Connection conn = DBConnection.getConnection();
+    PatientService patientService = new PatientService();
 
-        String sql = "SELECT id, full_name FROM patients";
+    List<Patient> patients =
+            patientService.getAllPatients();
 
-        PreparedStatement ps = conn.prepareStatement(sql);
+    jComboBox2.removeAllItems();
 
-        ResultSet rs = ps.executeQuery();
+    jComboBox2.addItem("Select Patient");
 
-        jComboBox2.removeAllItems();
+    for (Patient patient : patients) {
 
-        while (rs.next()) {
-
-            int id = rs.getInt("id");
-            String name = rs.getString("full_name");
-
-            jComboBox2.addItem(id + " - " + name);
-        }
-
-    } catch (Exception e) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Error loading patients: " + e.getMessage()
+        jComboBox2.addItem(
+                patient.getId()
+                + " - "
+                + patient.getFullName()
         );
     }
+
+    jComboBox2.setSelectedIndex(0);
 }
 
 
 private void loadDoctors() {
 
-    try {
+    DoctorService doctorService = new DoctorService();
 
-        Connection conn = DBConnection.getConnection();
+    List<Doctor> doctors =
+            doctorService.getAllDoctors();
 
-        String sql = "SELECT id, full_name FROM doctors";
+    jComboBox3.removeAllItems();
 
-        PreparedStatement ps = conn.prepareStatement(sql);
+    jComboBox3.addItem("Select Doctor");
 
-        ResultSet rs = ps.executeQuery();
+    for (Doctor doctor : doctors) {
 
-        jComboBox3.removeAllItems();
-
-        while (rs.next()) {
-
-            int id = rs.getInt("id");
-            String name = rs.getString("full_name");
-
-            jComboBox3.addItem(id + " - " + name);
-        }
-
-    } catch (Exception e) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Error loading doctors: " + e.getMessage()
+        jComboBox3.addItem(
+                doctor.getId()
+                + " - "
+                + doctor.getFullName()
         );
     }
+
+    jComboBox3.setSelectedIndex(0);
 }
 private void loadNextAppointmentId() {
 
@@ -982,7 +1104,6 @@ private void clearAppointmentFields() {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.toedter.calendar.JDateChooser dateChooser;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
@@ -994,6 +1115,7 @@ private void clearAppointmentFields() {
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
     private javax.swing.JComboBox<String> jComboBox4;
+    private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

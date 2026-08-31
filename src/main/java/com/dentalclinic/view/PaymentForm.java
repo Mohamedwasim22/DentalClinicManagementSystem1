@@ -3,6 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.dentalclinic.view;
+import com.dentalclinic.model.Payment;
+import com.dentalclinic.model.Patient;
+import com.dentalclinic.service.PaymentService;
+import com.dentalclinic.service.PatientService;
+import com.dentalclinic.dao.PaymentDAO;
+import javax.swing.JOptionPane;
+
+import java.util.List;
 
 /**
  *
@@ -15,9 +23,88 @@ public class PaymentForm extends javax.swing.JFrame {
     /**
      * Creates new form PaymentForm
      */
+   private PaymentService paymentService = new PaymentService();
     public PaymentForm() {
-        initComponents();
+
+    initComponents();
+
+    generatePaymentId();
+    setPaymentDate();
+    loadPatients();
+}
+    private void clearPaymentFields() {
+
+    // Payment ID
+    jTextField1.setText("");
+
+    // Patient
+    if (jComboBox3.getItemCount() > 0) {
+        jComboBox3.setSelectedIndex(0);
     }
+
+    // Payment Date
+    jDateChooser1.setDate(new java.util.Date());
+
+    // Amount
+    jTextField3.setText("");
+
+    // Payment Method
+    if (jComboBox1.getItemCount() > 0) {
+        jComboBox1.setSelectedIndex(0);
+    }
+
+    // Status
+    if (jComboBox2.getItemCount() > 0) {
+        jComboBox2.setSelectedIndex(0);
+    }
+
+    // Description
+    jTextField4.setText("");
+
+    // Payment ID should not be manually edited
+    jTextField1.setEditable(false);
+}
+    private void generatePaymentId() {
+
+    PaymentDAO dao = new PaymentDAO();
+
+    int nextId = dao.getNextPaymentId();
+
+    jTextField1.setText(String.valueOf(nextId));
+
+    jTextField1.setEditable(false);
+}
+
+
+private void setPaymentDate() {
+
+    jDateChooser1.setDate(new java.util.Date());
+}
+
+
+private void loadPatients() {
+
+    PatientService patientService =
+            new PatientService();
+
+    List<Patient> patients =
+            patientService.getAllPatients();
+
+    jComboBox3.removeAllItems();
+
+    jComboBox3.addItem("Select Patient");
+
+    for (Patient patient : patients) {
+
+        jComboBox3.addItem(
+                patient.getId()
+                + " - "
+                + patient.getFullName()
+        );
+    }
+
+    jComboBox3.setSelectedIndex(0);
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -46,10 +133,10 @@ public class PaymentForm extends javax.swing.JFrame {
         jTextField4 = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
         jComboBox2 = new javax.swing.JComboBox<>();
         jLabel11 = new javax.swing.JLabel();
         jComboBox3 = new javax.swing.JComboBox<>();
+        jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -169,13 +256,6 @@ public class PaymentForm extends javax.swing.JFrame {
         jLabel9.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel9.setText("Payment Date:");
 
-        jTextField5.setText("dd-mm-yyyy");
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField5ActionPerformed(evt);
-            }
-        });
-
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Status", "Paid", "Pending", "Cancelled" }));
         jComboBox2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -190,6 +270,16 @@ public class PaymentForm extends javax.swing.JFrame {
         jComboBox3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox3ActionPerformed(evt);
+            }
+        });
+
+        jDateChooser1.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                jDateChooser1AncestorAdded(evt);
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
             }
         });
 
@@ -212,7 +302,8 @@ public class PaymentForm extends javax.swing.JFrame {
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(154, 154, 154)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -223,26 +314,22 @@ public class PaymentForm extends javax.swing.JFrame {
                         .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup()
-                    .addGap(147, 147, 147)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(653, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(19, 19, 19)
@@ -254,8 +341,10 @@ public class PaymentForm extends javax.swing.JFrame {
                             .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(43, 43, 43))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(39, 39, 39))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(30, 30, 30)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -266,11 +355,6 @@ public class PaymentForm extends javax.swing.JFrame {
                             .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                    .addContainerGap(186, Short.MAX_VALUE)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(29, 29, 29)))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -442,7 +526,15 @@ public class PaymentForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField6ActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        // TODO add your handling code here:
+
+
+    PaymentDAO paymentDAO = new PaymentDAO();
+
+    int nextId = paymentDAO.getNextPaymentId();
+
+    jTextField1.setText(String.valueOf(nextId));
+    jTextField1.setEditable(false);
+     // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
@@ -457,28 +549,334 @@ public class PaymentForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField4ActionPerformed
 
-    private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField5ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField5ActionPerformed
-
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+    
+    try {
+
+        // Patient validation
+        if (jComboBox3.getSelectedIndex() == 0) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a patient!"
+            );
+
+            return;
+        }
+
+        // Amount validation
+        if (jTextField3.getText().trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter amount!"
+            );
+
+            return;
+        }
+
+        // Date validation
+        if (jDateChooser1.getDate() == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select payment date!"
+            );
+
+            return;
+        }
+
+        // Get patient ID
+        String patientText =
+                jComboBox3.getSelectedItem().toString();
+
+        int patientId =
+                Integer.parseInt(
+                        patientText.split(" - ")[0]
+                );
+
+        // Get date
+        java.util.Date selectedDate =
+                jDateChooser1.getDate();
+
+        java.text.SimpleDateFormat sdf =
+                new java.text.SimpleDateFormat("yyyy-MM-dd");
+
+        String paymentDate =
+                sdf.format(selectedDate);
+
+        // Get amount
+        double amount =
+                Double.parseDouble(
+                        jTextField3.getText().trim()
+                );
+
+        // Create Payment object
+        Payment payment =
+                new Payment(
+                        patientId,
+                        paymentDate,
+                        amount,
+                        jComboBox1.getSelectedItem().toString(),
+                        jComboBox2.getSelectedItem().toString(),
+                        jTextField4.getText().trim()
+                );
+
+        // Save
+        boolean saved =
+                paymentService.savePayment(payment);
+
+        if (saved) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Payment Saved Successfully!"
+            );
+
+            generatePaymentId();
+
+            clearPaymentFields();
+
+            generatePaymentId();
+            setPaymentDate();
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to Save Payment!"
+            );
+        }
+
+    } catch (NumberFormatException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Amount must be a valid number!"
+        );
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Error: " + e.getMessage()
+        );
+
+        e.printStackTrace();
+    }
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+     
+    jTextField1.setText("");
+    jComboBox3.setSelectedIndex(0);
+    jDateChooser1.setDate(new java.util.Date());
+    jTextField3.setText("");
+    jComboBox1.setSelectedIndex(0);
+    jComboBox2.setSelectedIndex(0);
+    jTextField4.setText("");
+
+    jTextField1.setEditable(false);
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+    
+    clearPaymentFields();
+
+    generatePaymentId();
+    setPaymentDate();
+
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
+    
+    try {
+
+        if (jTextField1.getText().trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a payment!"
+            );
+
+            return;
+        }
+
+        if (jComboBox3.getSelectedIndex() == 0) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a patient!"
+            );
+
+            return;
+        }
+
+        if (jTextField3.getText().trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter amount!"
+            );
+
+            return;
+        }
+
+        if (jDateChooser1.getDate() == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select payment date!"
+            );
+
+            return;
+        }
+
+        int paymentId =
+                Integer.parseInt(
+                        jTextField1.getText().trim()
+                );
+
+        String patientText =
+                jComboBox3.getSelectedItem().toString();
+
+        int patientId =
+                Integer.parseInt(
+                        patientText.split(" - ")[0]
+                );
+
+        java.text.SimpleDateFormat sdf =
+                new java.text.SimpleDateFormat("yyyy-MM-dd");
+
+        String paymentDate =
+                sdf.format(jDateChooser1.getDate());
+
+        double amount =
+                Double.parseDouble(
+                        jTextField3.getText().trim()
+                );
+
+        Payment payment =
+                new Payment(
+                        paymentId,
+                        patientId,
+                        paymentDate,
+                        amount,
+                        jComboBox1.getSelectedItem().toString(),
+                        jComboBox2.getSelectedItem().toString(),
+                        jTextField4.getText().trim()
+                );
+
+        boolean updated =
+                paymentService.updatePayment(payment);
+
+        if (updated) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Payment Updated Successfully!"
+            );
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to Update Payment!"
+            );
+        }
+
+    } catch (NumberFormatException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Invalid Payment ID or Amount!"
+        );
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Error: " + e.getMessage()
+        );
+
+        e.printStackTrace();
+    }
+
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+     
+    try {
+
+        if (jTextField1.getText().trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a payment!"
+            );
+
+            return;
+        }
+
+        int paymentId =
+                Integer.parseInt(
+                        jTextField1.getText().trim()
+                );
+
+        int confirm =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to delete this payment?",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        boolean deleted =
+                paymentService.deletePayment(paymentId);
+
+        if (deleted) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Payment Deleted Successfully!"
+            );
+
+            clearPaymentFields();
+
+            generatePaymentId();
+            setPaymentDate();
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to Delete Payment!"
+            );
+        }
+
+    } catch (NumberFormatException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Invalid Payment ID!"
+        );
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Error: " + e.getMessage()
+        );
+
+        e.printStackTrace();
+    }
+
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
@@ -488,6 +886,10 @@ public class PaymentForm extends javax.swing.JFrame {
     private void jComboBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox3ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox3ActionPerformed
+
+    private void jDateChooser1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jDateChooser1AncestorAdded
+jDateChooser1.setDate(new java.util.Date());        
+    }//GEN-LAST:event_jDateChooser1AncestorAdded
 
     /**
      * @param args the command line arguments
@@ -525,6 +927,7 @@ public class PaymentForm extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
+    private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -543,7 +946,6 @@ public class PaymentForm extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTable tblPatients;
     // End of variables declaration//GEN-END:variables

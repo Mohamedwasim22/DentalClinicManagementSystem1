@@ -1,4 +1,3 @@
-
 package com.dentalclinic.dao;
 
 import com.dentalclinic.model.Appointment;
@@ -8,6 +7,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Date;
+import java.sql.Time;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,18 +36,92 @@ public class AppointmentDAO {
 
             ps.setInt(1, appointment.getPatientId());
             ps.setInt(2, appointment.getDoctorId());
-            ps.setString(3, appointment.getAppointmentDate());
-            ps.setString(4, appointment.getAppointmentTime());
-            ps.setString(5, appointment.getStatus());
-            ps.setString(6, appointment.getNotes());
 
-            return ps.executeUpdate() > 0;
+            // =========================
+            // DATE
+            // yyyy-MM-dd
+            // =========================
 
-        } catch (SQLException e) {
+            LocalDate date = LocalDate.parse(
+                    appointment.getAppointmentDate(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            );
+
+            ps.setDate(3, Date.valueOf(date));
+
+            // =========================
+            // TIME
+            // =========================
+
+            String timeText =
+                    appointment.getAppointmentTime().trim();
+
+            LocalTime time;
+
+            try {
+
+                // Example: 11:00 AM
+                time = LocalTime.parse(
+                        timeText,
+                        DateTimeFormatter.ofPattern("hh:mm a")
+                );
+
+            } catch (Exception e) {
+
+                // Example: 11:00
+                time = LocalTime.parse(
+                        timeText,
+                        DateTimeFormatter.ofPattern("HH:mm")
+                );
+            }
+
+            ps.setTime(4, Time.valueOf(time));
+
+            // =========================
+            // STATUS
+            // =========================
+
+            ps.setString(
+                    5,
+                    appointment.getStatus()
+            );
+
+            // =========================
+            // NOTES / REASON
+            // =========================
+
+            ps.setString(
+                    6,
+                    appointment.getNotes()
+            );
+
+            // =========================
+            // EXECUTE
+            // =========================
+
+            int result = ps.executeUpdate();
 
             System.out.println(
-                    "Error adding appointment: " + e.getMessage()
+                    "Appointment Insert Result: " + result
             );
+
+            return result > 0;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "======================================"
+            );
+
+            System.out.println(
+                    "ERROR ADDING APPOINTMENT"
+            );
+
+            System.out.println(
+                    "======================================"
+            );
+
+            e.printStackTrace();
 
             return false;
         }
@@ -53,27 +133,32 @@ public class AppointmentDAO {
     // =========================
     public List<Appointment> getAllAppointments() {
 
-        List<Appointment> appointments = new ArrayList<>();
+        List<Appointment> appointments =
+                new ArrayList<>();
 
-        String sql = "SELECT * FROM appointments ORDER BY id DESC";
+        String sql =
+                "SELECT * FROM appointments ORDER BY id DESC";
 
         try (
             Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()
+            PreparedStatement ps =
+                    conn.prepareStatement(sql);
+            ResultSet rs =
+                    ps.executeQuery()
         ) {
 
             while (rs.next()) {
 
-                Appointment appointment = new Appointment(
-                        rs.getInt("id"),
-                        rs.getInt("patient_id"),
-                        rs.getInt("doctor_id"),
-                        rs.getString("appointment_date"),
-                        rs.getString("appointment_time"),
-                        rs.getString("status"),
-                        rs.getString("notes")
-                );
+                Appointment appointment =
+                        new Appointment(
+                                rs.getInt("id"),
+                                rs.getInt("patient_id"),
+                                rs.getInt("doctor_id"),
+                                rs.getString("appointment_date"),
+                                rs.getString("appointment_time"),
+                                rs.getString("status"),
+                                rs.getString("notes")
+                        );
 
                 appointments.add(appointment);
             }
@@ -81,8 +166,11 @@ public class AppointmentDAO {
         } catch (SQLException e) {
 
             System.out.println(
-                    "Error getting appointments: " + e.getMessage()
+                    "Error getting appointments: "
+                    + e.getMessage()
             );
+
+            e.printStackTrace();
         }
 
         return appointments;
@@ -92,9 +180,11 @@ public class AppointmentDAO {
     // =========================
     // UPDATE APPOINTMENT
     // =========================
-    public boolean updateAppointment(Appointment appointment) {
+    public boolean updateAppointment(
+            Appointment appointment) {
 
-        String sql = "UPDATE appointments SET "
+        String sql =
+                "UPDATE appointments SET "
                 + "patient_id = ?, "
                 + "doctor_id = ?, "
                 + "appointment_date = ?, "
@@ -105,24 +195,104 @@ public class AppointmentDAO {
 
         try (
             Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
+            PreparedStatement ps =
+                    conn.prepareStatement(sql)
         ) {
 
-            ps.setInt(1, appointment.getPatientId());
-            ps.setInt(2, appointment.getDoctorId());
-            ps.setString(3, appointment.getAppointmentDate());
-            ps.setString(4, appointment.getAppointmentTime());
-            ps.setString(5, appointment.getStatus());
-            ps.setString(6, appointment.getNotes());
-            ps.setInt(7, appointment.getId());
+            ps.setInt(
+                    1,
+                    appointment.getPatientId()
+            );
 
-            return ps.executeUpdate() > 0;
+            ps.setInt(
+                    2,
+                    appointment.getDoctorId()
+            );
 
-        } catch (SQLException e) {
+            // DATE
+
+            LocalDate date = LocalDate.parse(
+                    appointment.getAppointmentDate(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            );
+
+            ps.setDate(
+                    3,
+                    Date.valueOf(date)
+            );
+
+            // TIME
+
+            String timeText =
+                    appointment.getAppointmentTime().trim();
+
+            LocalTime time;
+
+            try {
+
+                time = LocalTime.parse(
+                        timeText,
+                        DateTimeFormatter.ofPattern("hh:mm a")
+                );
+
+            } catch (Exception e) {
+
+                time = LocalTime.parse(
+                        timeText,
+                        DateTimeFormatter.ofPattern("HH:mm")
+                );
+            }
+
+            ps.setTime(
+                    4,
+                    Time.valueOf(time)
+            );
+
+            // STATUS
+
+            ps.setString(
+                    5,
+                    appointment.getStatus()
+            );
+
+            // NOTES
+
+            ps.setString(
+                    6,
+                    appointment.getNotes()
+            );
+
+            // ID
+
+            ps.setInt(
+                    7,
+                    appointment.getId()
+            );
+
+            int result = ps.executeUpdate();
 
             System.out.println(
-                    "Error updating appointment: " + e.getMessage()
+                    "Appointment Update Result: "
+                    + result
             );
+
+            return result > 0;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "======================================"
+            );
+
+            System.out.println(
+                    "ERROR UPDATING APPOINTMENT"
+            );
+
+            System.out.println(
+                    "======================================"
+            );
+
+            e.printStackTrace();
 
             return false;
         }
@@ -139,18 +309,29 @@ public class AppointmentDAO {
 
         try (
             Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
+            PreparedStatement ps =
+                    conn.prepareStatement(sql)
         ) {
 
             ps.setInt(1, id);
 
-            return ps.executeUpdate() > 0;
+            int result = ps.executeUpdate();
+
+            System.out.println(
+                    "Appointment Delete Result: "
+                    + result
+            );
+
+            return result > 0;
 
         } catch (SQLException e) {
 
             System.out.println(
-                    "Error deleting appointment: " + e.getMessage()
+                    "Error deleting appointment: "
+                    + e.getMessage()
             );
+
+            e.printStackTrace();
 
             return false;
         }
