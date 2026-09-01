@@ -37,4 +37,11 @@ public class PaymentService {
     public boolean deletePayment(int id) {
         return paymentDAO.deletePayment(id);
     }
+    // =========================
+// SEARCH PAYMENTS
+// =========================
+public List<Payment> searchPayments(String keyword) {
+
+    return paymentDAO.searchPayments(keyword);
+}
 }

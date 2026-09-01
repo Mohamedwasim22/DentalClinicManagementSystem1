@@ -228,7 +228,64 @@ public class PaymentDAO {
         }
     }
 
+    // =========================
+// SEARCH PAYMENTS
+// =========================
+public List<Payment> searchPayments(String keyword) {
 
+    List<Payment> payments = new ArrayList<>();
+
+    String sql =
+            "SELECT * FROM payments " +
+            "WHERE CAST(id AS CHAR) LIKE ? " +
+            "OR CAST(patient_id AS CHAR) LIKE ? " +
+            "OR payment_method LIKE ? " +
+            "OR status LIKE ? " +
+            "OR description LIKE ? " +
+            "ORDER BY id DESC";
+
+    try (
+        Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+
+        String search = "%" + keyword + "%";
+
+        ps.setString(1, search);
+        ps.setString(2, search);
+        ps.setString(3, search);
+        ps.setString(4, search);
+        ps.setString(5, search);
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            Payment payment = new Payment(
+                    rs.getInt("id"),
+                    rs.getInt("patient_id"),
+                    rs.getString("payment_date"),
+                    rs.getDouble("amount"),
+                    rs.getString("payment_method"),
+                    rs.getString("status"),
+                    rs.getString("description")
+            );
+
+            payments.add(payment);
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println(
+                "Error searching payments: "
+                + e.getMessage()
+        );
+
+        e.printStackTrace();
+    }
+
+    return payments;
+}
     // =========================
     // DELETE PAYMENT
     // =========================

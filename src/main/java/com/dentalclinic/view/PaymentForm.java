@@ -9,6 +9,7 @@ import com.dentalclinic.service.PaymentService;
 import com.dentalclinic.service.PatientService;
 import com.dentalclinic.dao.PaymentDAO;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 import java.util.List;
 
@@ -24,13 +25,38 @@ public class PaymentForm extends javax.swing.JFrame {
      * Creates new form PaymentForm
      */
    private PaymentService paymentService = new PaymentService();
-    public PaymentForm() {
+   public PaymentForm() {
 
     initComponents();
 
     generatePaymentId();
     setPaymentDate();
     loadPatients();
+    loadPayments();
+}
+   private void loadPayments() {
+
+    PaymentDAO dao = new PaymentDAO();
+
+    List<Payment> payments = dao.getAllPayments();
+
+    DefaultTableModel model =
+            (DefaultTableModel) tblPatients.getModel();
+
+    model.setRowCount(0);
+
+    for (Payment payment : payments) {
+
+        model.addRow(new Object[]{
+            payment.getId(),
+            payment.getPatientId(),
+            payment.getPaymentDate(),
+            payment.getAmount(),
+            payment.getPaymentMethod(),
+            payment.getStatus(),
+            payment.getDescription()
+        });
+    }
 }
     private void clearPaymentFields() {
 
@@ -458,6 +484,15 @@ private void loadPatients() {
                 return types [columnIndex];
             }
         });
+        tblPatients.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                tblPatientsAncestorAdded(evt);
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+        });
         jScrollPane1.setViewportView(tblPatients);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -514,15 +549,90 @@ private void loadPatients() {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton7ActionPerformed
+    
+    searchPayments();
 
+    }//GEN-LAST:event_jButton7ActionPerformed
+private void searchPayments() {
+
+    String keyword = jTextField6.getText().trim();
+
+    PaymentDAO dao = new PaymentDAO();
+
+    List<Payment> payments =
+            dao.searchPayments(keyword);
+
+    DefaultTableModel model =
+            (DefaultTableModel) tblPatients.getModel();
+
+    model.setRowCount(0);
+
+    for (Payment payment : payments) {
+
+        model.addRow(new Object[]{
+            payment.getId(),
+            payment.getPatientId(),
+            payment.getPaymentDate(),
+            payment.getAmount(),
+            payment.getPaymentMethod(),
+            payment.getStatus(),
+            payment.getDescription()
+        });
+    }
+}
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
-        // TODO add your handling code here:
+    
+    jTextField5.setText("");
+
+    loadPayments();
+
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField6ActionPerformed
-        // TODO add your handling code here:
+    
+    String keyword;
+        keyword = jTextField6.getText().trim();
+
+    if (keyword.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter something to search!"
+        );
+
+        return;
+    }
+
+    List<Payment> payments =
+            paymentService.searchPayments(keyword);
+
+    javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel)
+                    tblPatients.getModel();
+
+    model.setRowCount(0);
+
+    for (Payment payment : payments) {
+
+        model.addRow(new Object[]{
+            payment.getId(),
+            payment.getPatientId(),
+            payment.getPaymentDate(),
+            payment.getAmount(),
+            payment.getPaymentMethod(),
+            payment.getStatus(),
+            payment.getDescription()
+        });
+    }
+
+    if (payments.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "No payment records found!"
+        );
+    }
+
     }//GEN-LAST:event_jTextField6ActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
@@ -891,6 +1001,32 @@ private void loadPatients() {
 jDateChooser1.setDate(new java.util.Date());        
     }//GEN-LAST:event_jDateChooser1AncestorAdded
 
+    private void tblPatientsAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_tblPatientsAncestorAdded
+    
+    List<Payment> payments =
+            paymentService.getAllPayments();
+
+    javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel)
+                    tblPatients.getModel();
+
+    model.setRowCount(0);
+
+    for (Payment payment : payments) {
+
+        model.addRow(new Object[]{
+            payment.getId(),
+            payment.getPatientId(),
+            payment.getPaymentDate(),
+            payment.getAmount(),
+            payment.getPaymentMethod(),
+            payment.getStatus(),
+            payment.getDescription()
+        });
+    }
+
+    }//GEN-LAST:event_tblPatientsAncestorAdded
+
     /**
      * @param args the command line arguments
      */
@@ -949,4 +1085,8 @@ jDateChooser1.setDate(new java.util.Date());
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTable tblPatients;
     // End of variables declaration//GEN-END:variables
+
+    
+
+  
 }
