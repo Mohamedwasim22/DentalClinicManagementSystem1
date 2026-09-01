@@ -5,14 +5,14 @@
 package com.dentalclinic.controller;
 
 import com.dentalclinic.model.User;
-import com.dentalclinic.service.LoginService;
+import com.dentalclinic.service.UserService;
 
 public class LoginController {
 
-    private final LoginService loginService;
+    private final UserService loginService;
 
     public LoginController() {
-        loginService = new LoginService();
+        loginService = new UserService();
     }
 
     public User login(String username, String password) {

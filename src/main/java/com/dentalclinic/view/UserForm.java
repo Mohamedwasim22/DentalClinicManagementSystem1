@@ -3,12 +3,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.dentalclinic.view;
+import com.dentalclinic.model.User;
+import com.dentalclinic.service.UserService;
+import com.dentalclinic.dao.UserDAO;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
 
 /**
  *
  * @author WASIM
  */
 public class UserForm extends javax.swing.JFrame {
+    private UserService userService;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UserForm.class.getName());
 
@@ -16,8 +23,19 @@ public class UserForm extends javax.swing.JFrame {
      * Creates new form UserForm
      */
     public UserForm() {
-        initComponents();
-    }
+
+    initComponents();
+
+    userService = new UserService();
+
+    loadRoles();
+    
+
+    generateUserId();
+    clearUserFields();
+
+    loadUsers();
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -54,7 +72,7 @@ public class UserForm extends javax.swing.JFrame {
         jButton5 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblPatients = new javax.swing.JTable();
+        tblUsers = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -304,7 +322,7 @@ public class UserForm extends javax.swing.JFrame {
         jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel4.setForeground(new java.awt.Color(0, 102, 102));
 
-        tblPatients.setModel(new javax.swing.table.DefaultTableModel(
+        tblUsers.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
                 {null, null, null, null, null},
@@ -329,7 +347,16 @@ public class UserForm extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(tblPatients);
+        tblUsers.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                tblUsersAncestorAdded(evt);
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+        });
+        jScrollPane1.setViewportView(tblUsers);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -385,19 +412,56 @@ public class UserForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
+    searchUsers();
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
-        // TODO add your handling code here:
+     jTextField6.setText("");
+
+    loadUsers();
+
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField6ActionPerformed
-        // TODO add your handling code here:
+    
+    String keyword = jTextField6.getText().trim();
+
+    if (keyword.isEmpty()) {
+
+        loadUsers();
+
+        return;
+    }
+
+    List<User> users =
+            userService.searchUsers(keyword);
+
+    DefaultTableModel model =
+            (DefaultTableModel) tblUsers.getModel();
+
+    model.setRowCount(0);
+
+    for (User user : users) {
+
+        model.addRow(new Object[]{
+            user.getId(),
+            user.getUsername(),
+            user.getPassword(),
+            user.getRole(),
+            user.getStatus()
+        });
+    }
+
     }//GEN-LAST:event_jTextField6ActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        // TODO add your handling code here:
+   
+    int nextId = userService.getNextUserId();
+
+    jTextField1.setText(String.valueOf(nextId));
+
+    jTextField1.setEditable(false);
+
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
@@ -405,7 +469,13 @@ public class UserForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
+    
+    jComboBox2.removeAllItems();
+
+    jComboBox2.addItem("Select Status");
+    jComboBox2.addItem("Active");
+    jComboBox2.addItem("Inactive");
+
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
@@ -413,11 +483,116 @@ public class UserForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+    
+    String username = jTextField2.getText().trim();
+
+    String password = jTextField3.getText().trim();
+
+    String role = jComboBox1.getSelectedItem().toString();
+
+    String status = jComboBox2.getSelectedItem().toString();
+
+    // =========================
+    // VALIDATION
+    // =========================
+
+    if (username.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter username!"
+        );
+
+        return;
+    }
+
+    if (password.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter password!"
+        );
+
+        return;
+    }
+
+    if (role.equals("Select Role")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select role!"
+        );
+
+        return;
+    }
+
+    if (status.equals("Select Status")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select status!"
+        );
+
+        return;
+    }
+
+    // =========================
+    // CREATE USER
+    // =========================
+
+    User user = new User(
+            username,
+            password,
+            role,
+            status
+    );
+
+    // =========================
+    // SAVE
+    // =========================
+
+    boolean saved = userService.saveUser(user);
+
+    if (saved) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "User Saved Successfully!"
+        );
+
+        loadUsers();
+
+        clearUserFields();
+
+        generateUserId();
+
+    } else {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Failed to Save User!"
+        );
+    }
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+
+
+    clearUserFields();
+
+    generateUserId();
+    
+    jTextField1.setText("");
+
+    jTextField2.setText("");
+
+    jTextField3.setText("");
+
+    jComboBox1.setSelectedIndex(0);
+
+    jComboBox2.setSelectedIndex(0);
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -425,17 +600,225 @@ public class UserForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
+    
+    if (jTextField1.getText().trim().isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select a user from table!"
+        );
+
+        return;
+    }
+
+    int id = Integer.parseInt(
+            jTextField1.getText().trim()
+    );
+
+    String username = jTextField2.getText().trim();
+
+    String password = jTextField3.getText().trim();
+
+    String role = jComboBox1.getSelectedItem().toString();
+
+    String status = jComboBox2.getSelectedItem().toString();
+
+    if (username.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter username!"
+        );
+
+        return;
+    }
+
+    if (password.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter password!"
+        );
+
+        return;
+    }
+
+    if (role.equals("Select Role")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select role!"
+        );
+
+        return;
+    }
+
+    if (status.equals("Select Status")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select status!"
+        );
+
+        return;
+    }
+
+    User user = new User(
+            id,
+            username,
+            password,
+            role,
+            status
+    );
+
+    boolean updated =
+            userService.updateUser(user);
+
+    if (updated) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "User Updated Successfully!"
+        );
+
+        loadUsers();
+
+        clearUserFields();
+
+        generateUserId();
+
+    } else {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Failed to Update User!"
+        );
+    }
+
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+    
+    if (jTextField1.getText().trim().isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select a user!"
+        );
+
+        return;
+    }
+
+    int id = Integer.parseInt(
+            jTextField1.getText().trim()
+    );
+
+    int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete this user?",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION
+    );
+
+    if (confirm != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    boolean deleted =
+            userService.deleteUser(id);
+
+    if (deleted) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "User Deleted Successfully!"
+        );
+
+        loadUsers();
+
+        clearUserFields();
+
+        generateUserId();
+
+    } else {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Failed to Delete User!"
+        );
+    }
+
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
+    private void tblUsersAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_tblUsersAncestorAdded
+    
+    List<User> users = userService.getAllUsers();
+
+    DefaultTableModel model =
+            (DefaultTableModel) tblUsers.getModel();
+
+    model.setRowCount(0);
+
+    for (User user : users) {
+
+        model.addRow(new Object[]{
+            user.getId(),
+            user.getUsername(),
+            user.getPassword(),
+            user.getRole(),
+            user.getStatus()
+        });
+    }
+    
+
+    int row = tblUsers.getSelectedRow();
+
+    if (row == -1) {
+        return;
+    }
+
+    int id = Integer.parseInt(
+            tblUsers.getValueAt(row, 0).toString()
+    );
+
+    String username =
+            tblUsers.getValueAt(row, 1).toString();
+
+    String password =
+            tblUsers.getValueAt(row, 2).toString();
+
+    String role =
+            tblUsers.getValueAt(row, 3).toString();
+
+    String status =
+            tblUsers.getValueAt(row, 4).toString();
+
+    jTextField1.setText(String.valueOf(id));
+
+    jTextField2.setText(username);
+
+    jTextField3.setText(password);
+
+    jComboBox1.setSelectedItem(role);
+
+    jComboBox2.setSelectedItem(status);
+
+
+    }//GEN-LAST:event_tblUsersAncestorAdded
+    private void loadRoles() {
+
+    jComboBox1.removeAllItems();
+
+    jComboBox1.addItem("Select Role");
+    jComboBox1.addItem("Admin");
+    jComboBox1.addItem("Doctor");
+    jComboBox1.addItem("Receptionist");
+    jComboBox1.addItem("Staff");
+}
     /**
      * @param args the command line arguments
      */
@@ -488,6 +871,65 @@ public class UserForm extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField6;
-    private javax.swing.JTable tblPatients;
+    private javax.swing.JTable tblUsers;
     // End of variables declaration//GEN-END:variables
+
+   private void loadStatuses() {
+
+    jComboBox2.removeAllItems();
+
+    jComboBox2.addItem("Select Status");
+    jComboBox2.addItem("Active");
+    jComboBox2.addItem("Inactive");
+
+    jComboBox2.setSelectedIndex(0);
+    jComboBox2.removeAllItems();
+
+    jComboBox2.addItem("Active");
+    jComboBox2.addItem("Inactive");
+}
+
+   private void generateUserId() {
+
+    try {
+        UserDAO dao = new UserDAO();
+
+        int nextId = dao.getNextUserId();
+
+        jTextField1.setText(String.valueOf(nextId));
+        jTextField1.setEditable(false);
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Error generating User ID: " + e.getMessage()
+        );
+    }
+}
+
+    private void clearUserFields() {
+
+    // User ID
+    jTextField1.setText("");
+
+    // Username
+    jTextField2.setText("");
+
+    // Password
+    jTextField3.setText("");
+
+    // Role
+    jComboBox1.setSelectedIndex(-1);
+
+    // Status
+    jComboBox2.setSelectedIndex(-1);
+}
+
+    private void loadUsers() {
+         // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private void searchUsers() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

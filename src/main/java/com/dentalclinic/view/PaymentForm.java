@@ -582,7 +582,7 @@ private void searchPayments() {
 }
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
     
-    jTextField5.setText("");
+    jTextField6.setText("");
 
     loadPayments();
 
